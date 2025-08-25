@@ -34,16 +34,16 @@ architecture rtl of BinaryBlast is
     begin
         -- The mapping here is for segments a, b, c, d, e, f, g.
         case digit is
-            when 0      => seg_pattern := "0000001"; -- 0
-            when 1      => seg_pattern := "1001111"; -- 1
-            when 2      => seg_pattern := "0010010"; -- 2
-            when 3      => seg_pattern := "0000110"; -- 3
-            when 4      => seg_pattern := "1001100"; -- 4
-            when 5      => seg_pattern := "0100100"; -- 5
-            when 6      => seg_pattern := "0100000"; -- 6
-            when 7      => seg_pattern := "0001111"; -- 7
-            when 8      => seg_pattern := "0000000"; -- 8
-            when 9      => seg_pattern := "0000100"; -- 9
+            when 0     => seg_pattern := "0000001"; -- 0
+            when 1     => seg_pattern := "1001111"; -- 1
+            when 2     => seg_pattern := "0010010"; -- 2
+            when 3     => seg_pattern := "0000110"; -- 3
+            when 4     => seg_pattern := "1001100"; -- 4
+            when 5     => seg_pattern := "0100100"; -- 5
+            when 6     => seg_pattern := "0100000"; -- 6
+            when 7     => seg_pattern := "0001111"; -- 7
+            when 8     => seg_pattern := "0000000"; -- 8
+            when 9     => seg_pattern := "0000100"; -- 9
             when others => seg_pattern := "1111111"; -- All segments off
         end case;
 
@@ -78,7 +78,7 @@ begin
                 when s11 => if sw = "1000000000" then state <= s12; end if;
                 when s12 => if sw = "1111110010" then state <= s13; end if;
                 when s13 => if sw = "1111111111" then state <= s14; end if;
-                when s14 => if btn = '1' then state <= s0; end if;
+                when s14 => if sw = "0000000000" then state <= s0; end if;
             end case;
         end if;
     end process;
@@ -118,29 +118,14 @@ begin
         variable svn_seg_temp : std_logic_vector(47 downto 0);
     begin
         temp_val := decimal_val;
-
-        -- Assign the last four digits
-        -- i=0 is the least significant digit (ones place)
         for i in 0 to 3 loop
             digit_val := temp_val mod 10;
             svn_seg_temp((i * 8) + 7 downto (i * 8)) := seven_seg_decoder(digit_val, false);
             temp_val := temp_val / 10;
         end loop;
-
-        -- Assign the first two digits to '0' with no DP
-        svn_seg_temp(47 downto 40) := seven_seg_decoder(0, false); -- 6th digit (most significant)
-        svn_seg_temp(39 downto 32) := seven_seg_decoder(0, false); -- 5th digit
-        
-        -- To show a decimal point for illustration, let's put it on HEX2 for 1.023
-        -- This is a specific case, you can adjust this logic as needed.
-        if decimal_val = 1023 then
-            svn_seg_temp(31 downto 24) := seven_seg_decoder(1, true);
-            svn_seg_temp(23 downto 16) := seven_seg_decoder(0, false);
-            svn_seg_temp(15 downto 8)  := seven_seg_decoder(2, false);
-            svn_seg_temp(7 downto 0)   := seven_seg_decoder(3, false);
-        end if;
-        
+        svn_seg_temp(47 downto 40) := seven_seg_decoder(0, false);
+        svn_seg_temp(39 downto 32) := seven_seg_decoder(0, false);
         svn_seg <= svn_seg_temp;
     end process;
-
+    
 end rtl;
